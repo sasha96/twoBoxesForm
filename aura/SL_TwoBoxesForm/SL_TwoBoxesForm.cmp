@@ -1,0 +1,76 @@
+<aura:component implements="lightning:availableForFlowScreens" access="global" controller="SL_ctrl_TwoBoxesForm">
+
+    <aura:attribute name="objectName" type="String" default="Account" />
+    <aura:attribute name="query" type="String" default="SELECT id, name FROM Account ORDER BY Name LIMIT 10" />
+    <aura:attribute name="selectedItems" type="String" />
+
+    <aura:attribute name="idSelectedElement" type="String" />
+
+    <aura:attribute name="baseListItems" type="Object[]" description="items in this list" />
+    <aura:attribute name="items" type="Object[]" description="items in this list" />
+    <aura:attribute name="rightItems" type="Object[]" description="items in this list" />
+
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}" />
+
+    <div class="slds-form-element" role="group" aria-labelledby="picklist-group-label">
+
+        <div class="slds-form-element__control">
+            <div class="slds-dueling-list">
+
+                <div class="slds-dueling-list__column">
+                    <span class="slds-form-element__label all-elem-class">
+                        All {!v.objectName}s</span>
+                    <span>
+                        <lightning:input aura:id="enter-search" name="enter-search" type="search"
+                            onchange="{! c.handleKeyUp }" />
+                    </span>
+                    <div class="slds-dueling-list__options">
+                        <ul aria-describedby="option-drag-label" class="slds-listbox slds-listbox_vertical"
+                            role="listbox">
+                            <aura:iteration items="{!v.items}" var="item">
+                                <div data-id="{!item.Id}" id="{!item.Id}" onclick="{!c.handleListClick}"
+                                    class="slds-listbox__option slds-listbox__option_plain slds-media slds-media_small slds-media_inline"
+                                    role="option" aria-selected="{!item.isSelected}">
+                                    {!item.Name}
+                                </div>
+                            </aura:iteration>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="slds-dueling-list__column buttons-arrow-class">
+                    <button class="slds-button slds-button_icon-container slds-button_icon-small"
+                        title="Move Selection to Selected Items" onclick="{!c.moveLeftToRight}">
+                        <lightning:icon iconName="utility:right" size="x-small"
+                            class="slds-button__icon slds-button__icon_large" />
+                        <span class="slds-assistive-text">Move Selection to Selected Items</span>
+                    </button>
+                    <button class="slds-button slds-button_icon-container slds-button_icon-small"
+                        title="Move Selection to Unselected Items" onclick="{!c.moveRightToLeft}">
+                        <lightning:icon iconName="utility:left" size="x-small"
+                            class="slds-button__icon slds-button__icon_large" />
+                        <span class="slds-assistive-text">Move Selection to Unselected Items</span>
+                    </button>
+                </div>
+
+                <div class="slds-dueling-list__column">
+                    <span class="slds-form-element__label" id="label-117">{!v.objectName}s of Interest</span>
+                    <div class="slds-dueling-list__options right-list-class">
+                        <ul aria-describedby="option-drag-label" class="slds-listbox slds-listbox_vertical"
+                            role="listbox">
+                            <aura:iteration items="{!v.rightItems}" var="item">
+                                <div data-id="{!item.Id}" id="{!item.Id}" onclick="{!c.handleListClick}"
+                                    class="slds-listbox__option slds-listbox__option_plain slds-media slds-media_small slds-media_inline"
+                                    role="option" aria-selected="{!item.isSelected}">
+                                    {!item.Name}
+                                </div>
+                            </aura:iteration>
+                        </ul>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+</aura:component>

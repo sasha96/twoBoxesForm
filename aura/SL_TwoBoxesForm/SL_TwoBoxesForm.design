@@ -1,0 +1,5 @@
+<design:component>
+    <design:attribute name="objectName" label="Name of object" />
+    <design:attribute name="query" label="Query" />
+    <design:attribute name="selectedItems" label="Selected elements" />
+</design:component>
