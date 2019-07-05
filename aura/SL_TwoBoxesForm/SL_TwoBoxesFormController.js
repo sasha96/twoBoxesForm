@@ -6,20 +6,49 @@
 
         var action = component.get("c.getPicklistValues");
 
+        var strRecords = component.get('v.selectedItems');
+        strRecords = strRecords.replace(/;/gi, ',');
+        strRecords = strRecords.substring(0, strRecords.length);
+
         action.setParams({
             objectApiName: component.get("v.objectName"),
-            query: component.get('v.query')
+            query: component.get('v.query'),
+            listOfRecords: strRecords
         });
 
         action.setCallback(this, function (response) {
 
             var state = response.getState();
             if (state === "SUCCESS") {
+
                 var result = response.getReturnValue();
                 var returnedData = JSON.parse(result);
 
-                component.set("v.baseListItems", returnedData);
-                component.set("v.items", returnedData);
+                var rightList = returnedData[1];
+                component.set('v.rightItems', rightList);
+
+
+                var mainResult = returnedData[0];
+                var temporary = [];
+
+                for (var item in mainResult) {
+
+                    var isAdd = true;
+                    for (var inner in rightList) {
+
+                        if (rightList[inner].Id === mainResult[item].Id) {
+                            isAdd = false;
+                        }
+
+                    }
+                    if (isAdd) {
+                        temporary.push(mainResult[item]);
+                    }
+
+                }
+
+                component.set("v.baseListItems", temporary);
+                component.set("v.items", temporary);
             }
             else {
                 var toastEvent = $A.get("e.force:showToast");
@@ -100,7 +129,9 @@
             component.set("v.rightItems", rightSide === undefined ? [] : helper.sortByName(rightSide));
         }
 
-        component.set('v.selectedItems', component.get('v.rightItems'));
+        var res = component.get('v.selectedItems');
+        res = res + ';' + idSelectedElement;
+        component.set('v.selectedItems', res);
     },
 
     /*
@@ -133,7 +164,16 @@
             component.set("v.rightItems", temp === undefined ? [] : helper.sortByName(temp));
         }
 
-        component.set('v.selectedItems', component.get('v.rightItems'));
+        var res = component.get('v.selectedItems');
+        if (res.includes(';' + idSelectedElement)) {
+            res = res.replace(';' + idSelectedElement, '');
+        } else if (res.includes(idSelectedElement + ';')) {
+            res = res.replace(idSelectedElement + ';', '');
+        } else {
+            res = res.replace(idSelectedElement, '');
+        }
+
+        component.set('v.selectedItems', res);
     },
 
     /*

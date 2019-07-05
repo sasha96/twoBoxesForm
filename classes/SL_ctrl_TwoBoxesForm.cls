@@ -8,7 +8,7 @@
 public class SL_ctrl_TwoBoxesForm {
    
    @AuraEnabled
-   public static String getPicklistValues(String objectApiName,String query){ 
+   public static String getPicklistValues(String objectApiName,String query, String listOfRecords){ 
 
         List<sObject> lstRecords = Database.query(query);
 
@@ -17,7 +17,37 @@ public class SL_ctrl_TwoBoxesForm {
         for (Integer i = 0; i < lstRecords.size(); i++) {
             lstWrappers.add(new RecordsWrapper((String)lstRecords[i].get('id'), (String)lstRecords[i].get('Name'), false));
         }
-        return JSON.serialize(lstWrappers);
+        
+        List<RecordsWrapper> lstWrappersRight = null;
+        if(listOfRecords != null || listOfRecords != ''){
+            
+            List<String> lstResult = new List<String>();
+            Boolean isTrue = true;
+            while(isTrue && listOfRecords != null){
+                if (listOfRecords.contains(',') == true){
+                    lstResult.add(listOfRecords.substring(0, listOfRecords.substringBefore(',').length()));
+                    listOfRecords = listOfRecords.substring(listOfRecords.substringBefore(',').length() + 1);
+                } else{
+                    lstResult.add(listOfRecords);
+                    isTrue = false;
+                }                
+            }
+            
+            String queryRight = 'SELECT id, Name FROM ' + objectApiName + ' WHERE id IN :  lstResult ';
+
+            List<sObject> lstRecordsRight = Database.query(queryRight);
+            
+            lstWrappersRight = new List<RecordsWrapper>();
+        
+            for (Integer i = 0; i < lstRecordsRight.size(); i++) {
+                lstWrappersRight.add(new RecordsWrapper((String)lstRecordsRight[i].get('id'), (String)lstRecordsRight[i].get('Name'), false));
+            }
+        }
+        List<List<RecordsWrapper>> wrapper = new List<List<RecordsWrapper>>();
+        wrapper.add(lstWrappers);
+        wrapper.add(lstWrappersRight);
+
+        return JSON.serialize(wrapper);
     }
 
     public class RecordsWrapper {
@@ -31,4 +61,5 @@ public class SL_ctrl_TwoBoxesForm {
             this.isSelected = isSelected;
         }
     } 
+    
 }

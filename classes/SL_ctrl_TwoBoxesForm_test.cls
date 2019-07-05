@@ -26,8 +26,9 @@ public class SL_ctrl_TwoBoxesForm_test {
             usr.username='test29t@ukr.com';
         insert usr;
 
+        String listOfRecords = usr.id + ',' + usr.id;
         String query = 'SELECT id, name FROM User WHERE username = \'test29t@ukr.com\'';
-        String returnedResult = SL_ctrl_TwoBoxesForm.getPicklistValues('User', query);
+        String returnedResult = SL_ctrl_TwoBoxesForm.getPicklistValues('User', query, listOfRecords);
 
         List<sObject> lstRecords = Database.query(query);
         List<SL_ctrl_TwoBoxesForm.RecordsWrapper> lstWrappers = new List<SL_ctrl_TwoBoxesForm.RecordsWrapper>();
@@ -36,7 +37,37 @@ public class SL_ctrl_TwoBoxesForm_test {
             lstWrappers.add(new SL_ctrl_TwoBoxesForm.RecordsWrapper((String)lstRecords[i].get('id'), (String)lstRecords[i].get('Name'), false));
         }
 
-        String expectedResult = JSON.serialize(lstWrappers);
+        List<SL_ctrl_TwoBoxesForm.RecordsWrapper> lstWrappersRight = null;
+        if(listOfRecords != null || listOfRecords != ''){
+            
+            List<String> lstResult = new List<String>();
+            Boolean isTrue = true;
+            while(isTrue && listOfRecords != null){
+                if (listOfRecords.contains(',') == true){
+                    lstResult.add(listOfRecords.substring(0, listOfRecords.substringBefore(',').length()));
+                    listOfRecords = listOfRecords.substring(listOfRecords.substringBefore(',').length() + 1);
+                } else{
+                    lstResult.add(listOfRecords);
+                    isTrue = false;
+                }                
+            }
+            
+            String queryRight = 'SELECT id, Name FROM User WHERE id IN :  lstResult ';
+
+            List<sObject> lstRecordsRight = Database.query(queryRight);
+            
+            lstWrappersRight = new List<SL_ctrl_TwoBoxesForm.RecordsWrapper>();
+        
+            for (Integer i = 0; i < lstRecordsRight.size(); i++) {
+                lstWrappersRight.add(new SL_ctrl_TwoBoxesForm.RecordsWrapper((String)lstRecordsRight[i].get('id'), (String)lstRecordsRight[i].get('Name'), false));
+            }
+        }
+        List<List<SL_ctrl_TwoBoxesForm.RecordsWrapper>> wrapper = new List<List<SL_ctrl_TwoBoxesForm.RecordsWrapper>>();
+        wrapper.add(lstWrappers);
+        wrapper.add(lstWrappersRight);
+
+
+        String expectedResult = JSON.serialize(wrapper);
 
         System.assertEquals(expectedResult, returnedResult);
 
